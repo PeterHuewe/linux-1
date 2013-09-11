@@ -308,6 +308,47 @@ static size_t hist_entry__callchain_fprintf(struct hist_entry *he,
 	return hist_entry_callchain__fprintf(he, total_period, left_margin, fp);
 }
 
+static inline void advance_hpp(struct perf_hpp *hpp, int inc)
+{
+	hpp->buf  += inc;
+	hpp->size -= inc;
+}
+
+static int hist_entry__period_snprintf(struct perf_hpp *hpp,
+				       struct hist_entry *he,
+				       bool color)
+{
+	const char *sep = symbol_conf.field_sep;
+	struct perf_hpp_fmt *fmt;
+	char *start = hpp->buf;
+	int ret;
+	bool first = true;
+
+	if (symbol_conf.exclude_other && !he->parent)
+		return 0;
+
+	perf_hpp__for_each_format(fmt) {
+		/*
+		 * If there's no field_sep, we still need
+		 * to display initial '  '.
+		 */
+		if (!sep || !first) {
+			ret = scnprintf(hpp->buf, hpp->size, "%s", sep ?: "  ");
+			advance_hpp(hpp, ret);
+		} else
+			first = false;
+
+		if (color && fmt->color)
+			ret = fmt->color(fmt, hpp, he);
+		else
+			ret = fmt->entry(fmt, hpp, he);
+
+		advance_hpp(hpp, ret);
+	}
+
+	return hpp->buf - start;
+}
+
 static int hist_entry__fprintf(struct hist_entry *he, size_t size,
 			       struct hists *hists, FILE *fp)
 {
@@ -334,7 +375,7 @@ static int hist_entry__fprintf(struct hist_entry *he, size_t size,
 }
 
 size_t hists__fprintf(struct hists *hists, bool show_header, int max_rows,
-		      int max_cols, FILE *fp)
+		      int max_cols, float min_pcnt, FILE *fp)
 {
 	struct perf_hpp_fmt *fmt;
 	struct sort_entry *se;
@@ -365,7 +406,7 @@ size_t hists__fprintf(struct hists *hists, bool show_header, int max_rows,
 		else
 			first = false;
 
-		fmt->header(&dummy_hpp);
+		fmt->header(fmt, &dummy_hpp);
 		fprintf(fp, "%s", bf);
 	}
 
@@ -410,7 +451,7 @@ size_t hists__fprintf(struct hists *hists, bool show_header, int max_rows,
 		else
 			first = false;
 
-		width = fmt->width(&dummy_hpp);
+		width = fmt->width(fmt, &dummy_hpp);
 		for (i = 0; i < width; i++)
 			fprintf(fp, ".");
 	}
@@ -440,8 +481,13 @@ size_t hists__fprintf(struct hists *hists, bool show_header, int max_rows,
 print_entries:
 	for (nd = rb_first(&hists->entries); nd; nd = rb_next(nd)) {
 		struct hist_entry *h = rb_entry(nd, struct hist_entry, rb_node);
+		float percent = h->stat.period * 100.0 /
+					hists->stats.total_period;
 
 		if (h->filtered)
+			continue;
+
+		if (percent < min_pcnt)
 			continue;
 
 		ret += hist_entry__fprintf(h, max_cols, hists, fp);

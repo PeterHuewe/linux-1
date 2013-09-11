@@ -88,8 +88,6 @@ gianfar.txt
 	- Gianfar Ethernet Driver.
 ieee802154.txt
 	- Linux IEEE 802.15.4 implementation, API and drivers
-ifenslave.c
-	- Configure network interfaces for parallel routing (bonding).
 igb.txt
 	- README for the Intel Gigabit Ethernet Driver (igb).
 igbvf.txt
@@ -126,6 +124,8 @@ multiqueue.txt
 	- HOWTO for multiqueue network device support.
 netconsole.txt
 	- The network console module netconsole.ko: configuration and notes.
+netdev-FAQ.txt
+	- FAQ describing how to submit net changes to netdev mailing list.
 netdev-features.txt
 	- Network interface features API description.
 netdevices.txt

@@ -45,6 +45,9 @@ extern void __init chrdev_init(void);
  * namei.c
  */
 extern int __inode_permission(struct inode *, int);
+extern int user_path_mountpoint_at(int, const char __user *, unsigned int, struct path *);
+extern int vfs_path_lookup(struct dentry *, struct vfsmount *,
+			   const char *, unsigned int, struct path *);
 
 /*
  * namespace.c
@@ -96,11 +99,12 @@ struct open_flags {
 	umode_t mode;
 	int acc_mode;
 	int intent;
+	int lookup_flags;
 };
 extern struct file *do_filp_open(int dfd, struct filename *pathname,
-		const struct open_flags *op, int flags);
+		const struct open_flags *op);
 extern struct file *do_file_open_root(struct dentry *, struct vfsmount *,
-		const char *, const struct open_flags *, int lookup_flags);
+		const char *, const struct open_flags *);
 
 extern long do_handle_open(int mountdirfd,
 			   struct file_handle __user *ufh, int open_flag);
@@ -125,11 +129,13 @@ extern int invalidate_inodes(struct super_block *, bool);
  * dcache.c
  */
 extern struct dentry *__d_alloc(struct super_block *, const struct qstr *);
+extern int d_set_mounted(struct dentry *dentry);
 
 /*
  * read_write.c
  */
 extern ssize_t __kernel_write(struct file *, const char *, size_t, loff_t *);
+extern int rw_verify_area(int, struct file *, const loff_t *, size_t);
 
 /*
  * splice.c

@@ -1647,12 +1647,12 @@ static int bfin_mac_probe(struct platform_device *pdev)
 
 	setup_mac_addr(ndev->dev_addr);
 
-	if (!pdev->dev.platform_data) {
+	if (!dev_get_platdata(&pdev->dev)) {
 		dev_err(&pdev->dev, "Cannot get platform device bfin_mii_bus!\n");
 		rc = -ENODEV;
 		goto out_err_probe_mac;
 	}
-	pd = pdev->dev.platform_data;
+	pd = dev_get_platdata(&pdev->dev);
 	lp->mii_bus = platform_get_drvdata(pd);
 	if (!lp->mii_bus) {
 		dev_err(&pdev->dev, "Cannot get mii_bus!\n");
@@ -1660,7 +1660,7 @@ static int bfin_mac_probe(struct platform_device *pdev)
 		goto out_err_probe_mac;
 	}
 	lp->mii_bus->priv = ndev;
-	mii_bus_data = pd->dev.platform_data;
+	mii_bus_data = dev_get_platdata(&pd->dev);
 
 	rc = mii_probe(ndev, mii_bus_data->phy_mode);
 	if (rc) {
@@ -1719,7 +1719,6 @@ out_err_mii_probe:
 	mdiobus_unregister(lp->mii_bus);
 	mdiobus_free(lp->mii_bus);
 out_err_probe_mac:
-	platform_set_drvdata(pdev, NULL);
 	free_netdev(ndev);
 
 	return rc;
@@ -1731,8 +1730,6 @@ static int bfin_mac_remove(struct platform_device *pdev)
 	struct bfin_mac_local *lp = netdev_priv(ndev);
 
 	bfin_phc_release(lp);
-
-	platform_set_drvdata(pdev, NULL);
 
 	lp->mii_bus->priv = NULL;
 
@@ -1868,7 +1865,6 @@ static int bfin_mii_bus_remove(struct platform_device *pdev)
 	struct bfin_mii_bus_platform_data *mii_bus_pd =
 		dev_get_platdata(&pdev->dev);
 
-	platform_set_drvdata(pdev, NULL);
 	mdiobus_unregister(miibus);
 	kfree(miibus->irq);
 	mdiobus_free(miibus);
