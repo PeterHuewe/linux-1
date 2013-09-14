@@ -18,7 +18,8 @@
 #include <linux/dma-mapping.h>
 #include <linux/dmapool.h>
 #include <linux/slab.h>
-#include <asm/vio.h>
+//#include <asm/vio.h>
+#include "fake_vio.h"
 #include <asm/irq.h>
 #include <linux/types.h>
 #include <linux/list.h>
