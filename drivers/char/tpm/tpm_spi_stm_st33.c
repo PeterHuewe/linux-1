@@ -591,36 +591,11 @@ out:
 	return size;
 }
 
-static DEVICE_ATTR(pubek, S_IRUGO, tpm_show_pubek, NULL);
-static DEVICE_ATTR(pcrs, S_IRUGO, tpm_show_pcrs, NULL);
-static DEVICE_ATTR(enabled, S_IRUGO, tpm_show_enabled, NULL);
-static DEVICE_ATTR(active, S_IRUGO, tpm_show_active, NULL);
-static DEVICE_ATTR(owned, S_IRUGO, tpm_show_owned, NULL);
-static DEVICE_ATTR(temp_deactivated, S_IRUGO, tpm_show_temp_deactivated, NULL);
-static DEVICE_ATTR(caps, S_IRUGO, tpm_show_caps, NULL);
-static DEVICE_ATTR(cancel, S_IWUSR | S_IWGRP, NULL, tpm_store_cancel);
-
-static struct attribute *stm_tpm_attrs[] = {
-	&dev_attr_pubek.attr,
-	&dev_attr_pcrs.attr,
-	&dev_attr_enabled.attr,
-	&dev_attr_active.attr,
-	&dev_attr_owned.attr,
-	&dev_attr_temp_deactivated.attr,
-	&dev_attr_caps.attr,
-	&dev_attr_cancel.attr, NULL,
-};
-
-static struct attribute_group stm_tpm_attr_grp = {
-	.attrs = stm_tpm_attrs
-};
-
 static struct tpm_vendor_specific st_spi_tpm = {
 	.send = tpm_stm_spi_send,
 	.recv = tpm_stm_spi_recv,
 	.cancel = tpm_stm_spi_cancel,
 	.status = tpm_stm_spi_status,
-	.attr_group = &stm_tpm_attr_grp,
 };
 
 static int evaluate_latency(struct tpm_chip *chip)

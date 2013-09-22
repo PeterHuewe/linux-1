@@ -46,6 +46,14 @@ enum tpm_addr {
 	TPM_ADDR = 0x4E,
 };
 
+/* Indexes the duration array */
+enum tpm_duration {
+	TPM_SHORT = 0,
+	TPM_MEDIUM = 1,
+	TPM_LONG = 2,
+	TPM_UNDEFINED,
+};
+
 #define TPM_WARN_RETRY          0x800
 #define TPM_WARN_DOING_SELFTEST 0x802
 #define TPM_ERR_DEACTIVATED     0x6
@@ -53,27 +61,6 @@ enum tpm_addr {
 #define TPM_ERR_INVALID_POSTINIT 38
 
 #define TPM_HEADER_SIZE		10
-extern ssize_t tpm_show_pubek(struct device *, struct device_attribute *attr,
-				char *);
-extern ssize_t tpm_show_pcrs(struct device *, struct device_attribute *attr,
-				char *);
-extern ssize_t tpm_show_caps(struct device *, struct device_attribute *attr,
-				char *);
-extern ssize_t tpm_store_cancel(struct device *, struct device_attribute *attr,
-				const char *, size_t);
-extern ssize_t tpm_show_enabled(struct device *, struct device_attribute *attr,
-				char *);
-extern ssize_t tpm_show_active(struct device *, struct device_attribute *attr,
-				char *);
-extern ssize_t tpm_show_owned(struct device *, struct device_attribute *attr,
-				char *);
-extern ssize_t tpm_show_temp_deactivated(struct device *,
-					 struct device_attribute *attr, char *);
-extern ssize_t tpm_show_durations(struct device *,
-				  struct device_attribute *attr, char *);
-extern ssize_t tpm_show_timeouts(struct device *,
-				 struct device_attribute *attr, char *);
-
 struct tpm_chip;
 
 struct tpm_vendor_specific {
@@ -95,7 +82,6 @@ struct tpm_vendor_specific {
 	u8 (*status) (struct tpm_chip *);
 	void (*release) (struct device *);
 	struct miscdevice miscdev;
-	struct attribute_group *attr_group;
 	struct list_head list;
 	int locality;
 	unsigned long timeout_a, timeout_b, timeout_c, timeout_d; /* jiffies */
@@ -171,6 +157,8 @@ struct tpm_output_header {
 	__be32	return_code;
 } __packed;
 
+#define TPM_TAG_RQU_COMMAND cpu_to_be16(193)
+
 struct	stclear_flags_t {
 	__be16	tag;
 	u8	deactivated;
@@ -243,6 +231,24 @@ typedef union {
 	struct timeout_t  timeout;
 	struct duration_t duration;
 } cap_t;
+
+enum tpm_capabilities {
+	TPM_CAP_FLAG = cpu_to_be32(4),
+	TPM_CAP_PROP = cpu_to_be32(5),
+	CAP_VERSION_1_1 = cpu_to_be32(0x06),
+	CAP_VERSION_1_2 = cpu_to_be32(0x1A)
+};
+
+enum tpm_sub_capabilities {
+	TPM_CAP_PROP_PCR = cpu_to_be32(0x101),
+	TPM_CAP_PROP_MANUFACTURER = cpu_to_be32(0x103),
+	TPM_CAP_FLAG_PERM = cpu_to_be32(0x108),
+	TPM_CAP_FLAG_VOL = cpu_to_be32(0x109),
+	TPM_CAP_PROP_OWNER = cpu_to_be32(0x111),
+	TPM_CAP_PROP_TIS_TIMEOUT = cpu_to_be32(0x115),
+	TPM_CAP_PROP_TIS_DURATION = cpu_to_be32(0x120),
+
+};
 
 struct	tpm_getcap_params_in {
 	__be32	cap;
@@ -340,6 +346,10 @@ extern int wait_for_tpm_stat(struct tpm_chip *, u8, unsigned long,
 
 int tpm_dev_add_device(struct tpm_chip *chip);
 void tpm_dev_del_device(struct tpm_chip *chip);
+int tpm_sysfs_add_device(struct tpm_chip *chip);
+void tpm_sysfs_del_device(struct tpm_chip *chip);
+
+int tpm_pcr_read_dev(struct tpm_chip *chip, int pcr_idx, u8 *res_buf);
 
 #ifdef CONFIG_ACPI
 extern int tpm_add_ppi(struct kobject *);
