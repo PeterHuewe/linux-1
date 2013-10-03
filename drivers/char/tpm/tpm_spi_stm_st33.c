@@ -591,15 +591,6 @@ out:
 	return size;
 }
 
-static const struct file_operations tpm_st33_spi_fops = {
-	.owner = THIS_MODULE,
-	.llseek = no_llseek,
-	.read = tpm_read,
-	.write = tpm_write,
-	.open = tpm_open,
-	.release = tpm_release,
-};
-
 static DEVICE_ATTR(pubek, S_IRUGO, tpm_show_pubek, NULL);
 static DEVICE_ATTR(pcrs, S_IRUGO, tpm_show_pcrs, NULL);
 static DEVICE_ATTR(enabled, S_IRUGO, tpm_show_enabled, NULL);
@@ -630,7 +621,6 @@ static struct tpm_vendor_specific st_spi_tpm = {
 	.cancel = tpm_stm_spi_cancel,
 	.status = tpm_stm_spi_status,
 	.attr_group = &stm_tpm_attr_grp,
-	.miscdev = {.fops = &tpm_st33_spi_fops,},
 };
 
 static int evaluate_latency(struct tpm_chip *chip)
