@@ -110,6 +110,16 @@ config TCG_ST33_I2C
         To compile this driver as a module, choose M here; the module will be
         called tpm_stm_st33_i2c.
 
+config TCG_ST33_SPI
+	tristate "STMicroelectronics ST33 SPI"
+	depends on SPI
+	depends on GPIOLIB
+	---help---
+	  If you have a TPM security chip from STMicroelectronics working with
+	  an SPI bus say Yes and it will be accessible from within Linux.
+	  To compile this driver as a module, choose M here; the module will be
+	  called tpm_stm_st33_spi.
+
 config TCG_XEN
 	tristate "XEN TPM Interface"
 	depends on TCG_TPM && XEN
