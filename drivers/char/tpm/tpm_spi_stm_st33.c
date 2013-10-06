@@ -591,7 +591,7 @@ out:
 	return size;
 }
 
-static struct tpm_vendor_specific st_spi_tpm = {
+static const struct tpm_class_ops st_spi_tpm = {
 	.send = tpm_stm_spi_send,
 	.recv = tpm_stm_spi_recv,
 	.cancel = tpm_stm_spi_cancel,
