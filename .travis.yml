@@ -1,7 +1,7 @@
 language: c
 compiler:
   - gcc
-# Change this to your needs
+
 sudo: false
 addons:
   apt:
@@ -10,6 +10,8 @@ addons:
         - qemu-kvm 
         - qemu-kvm-extras
         - genext2fs
+        - sparse
+
 before_script:
  - mkdir rootfs
  - wget http://www.hs-augsburg.de/~phuewe/travis/system-image-i686.tar.gz
