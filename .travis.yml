@@ -17,10 +17,18 @@ before_script:
  - wget http://www.hs-augsburg.de/~phuewe/travis/tpmconfig.txt
  - tar -xvf system-image-i686.tar.gz
 script: 
+ - uname -a
+ - cat /proc/cpuinfo
  - ./scripts/extract-ikconfig system-image-i686/linux >.config
  - cat tpmconfig.txt >> .config
  - make ARCH=x86 olddefconfig
+ - cat tpmconfig.txt >> .config
+ - make ARCH=x86 olddefconfig
  - make -j64
+ - rm drivers/char/tpm/*.o
+ - rm drivers/char/tpm/*/*.o
+ - make C=1 ARCH=x86 M=$(pwd)/drivers/char/tpm  modules
+ - ls drivers/char/tpm/*.ko
  - make ARCH=x86 INSTALL_MOD_PATH=rootfs modules_install
  - cp arch/x86/boot/bzImage system-image-i686/linux
  - genext2fs -d rootfs -b 1000 system-image-i686/hda.img
