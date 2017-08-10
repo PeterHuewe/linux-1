@@ -226,7 +226,7 @@ static struct pnp_driver tis_pnp_driver = {
 	},
 };
 
-#define TIS_HID_USR_IDX sizeof(tpm_pnp_tbl)/sizeof(struct pnp_device_id) -2
+#define TIS_HID_USR_IDX (sizeof(tpm_pnp_tbl) / sizeof(struct pnp_device_id) - 2)
 module_param_string(hid, tpm_pnp_tbl[TIS_HID_USR_IDX].id,
 		    sizeof(tpm_pnp_tbl[TIS_HID_USR_IDX].id), 0444);
 MODULE_PARM_DESC(hid, "Set additional specific HID for this driver to probe");
